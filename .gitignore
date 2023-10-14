@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Cache
+.cache/
+
+# Virtual Environment
+.venv/
+
+# Audio files
+recordings/
+
+# IDE files
+.idea/
+.vscode/
+

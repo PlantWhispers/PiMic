@@ -1,0 +1,15 @@
+Kivy~=2.2.1
+docutils~=0.20.1
+pip~=23.2.1
+wheel~=0.41.2
+setuptools~=68.2.0
+Pygments~=2.16.1
+numpy~=1.26.0
+certifi~=2023.7.22
+requests~=2.31.0
+cffi~=1.16.0
+idna~=3.4
+urllib3~=2.0.6
+pycparser~=2.21
+sounddevice~=0.4.6
+wavio~=0.0.8
