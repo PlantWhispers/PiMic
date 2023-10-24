@@ -16,7 +16,7 @@ class AudioRecorder:
 
     def initialize_mic(self):
         devices = sd.query_devices()
-        device_name = "UltraMic384K_EVO 16bit r0: USB Audio (hw:2,0)"
+        device_name = "UltraMic384K_EVO 16bit r0: USB Audio (hw:1,0)"
         mic_num = next((i for i, device in enumerate(devices) if device['name'] == device_name), None)
         if mic_num is None:
             print("Device not found. Available devices are:")
