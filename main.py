@@ -10,14 +10,17 @@ from audio_recorder import AudioRecorder
 class CustomButton(Widget):
     def redraw(self, recording, *args):
         self.canvas.clear()
+        # Makes sure the size of the square or circle (representing reccord and stop respectively) fits the screen.
         min_dim = min(self.width, self.height) * 0.8
+        # Centers the shape
         x = self.x + (self.width - min_dim) / 2
         y = self.y + (self.height - min_dim) / 2
         pos = (x, y)
         size = (min_dim, min_dim)
         
         with self.canvas:
-            Color(1, 0, 0)
+            Color(1, 0, 0) # sets color to red
+            # draws a sqare if recording, if not, a circle
             if recording:
                 Rectangle(pos=pos, size=size)
             else:
@@ -30,6 +33,7 @@ class TimerHandler:
 
     def update_timer(self, *args):
         self.seconds += 1
+        # BUG: not showing hours
         mins, sec = divmod(self.seconds, 60)
         self.label.text = f"{mins:02d}:{sec:02d}"
 
@@ -49,8 +53,9 @@ class RecorderApp(App):
         
         self.timer_label = Label(text="00:00")
         self.custom_button = CustomButton()
-        self.custom_button.redraw(self.recording)
         self.custom_button.bind(on_touch_down=self.toggle_recording)
+        self.custom_button.bind(size=lambda instance, value: self.custom_button.redraw(self.recording))
+        
         
         self.box.add_widget(self.timer_label)
         self.box.add_widget(self.custom_button)
@@ -64,7 +69,10 @@ class RecorderApp(App):
         Window.bind(size=self.on_window_resize)
 
         self.on_window_resize(Window, Window.size)
-        
+
+
+        self.custom_button.redraw(self.recording)
+
         return self.box
 
     def on_window_resize(self, window, size):
