@@ -6,26 +6,25 @@ from datetime import datetime
 import os
 
 class AudioRecorder:
-    def __init__(self, fs, channels):
-        self.fs = fs
+    def __init__(self, samplerate, channels):
+        self.samplerate = samplerate
         self.channels = channels
         self.thread = None
-        self.mic_num = self.initialize_mic()
+        # TODO
+        self.mic_num = None
         self.recording = np.empty((0, self.channels), dtype='int16')
         self.start_time = None
 
-    def initialize_mic(self):
-        devices = sd.query_devices()
-        device_name = "UltraMic384K_EVO 16bit r0: USB Audio (hw:1,0)"
-        mic_num = next((i for i, device in enumerate(devices) if device['name'] == device_name), None)
-        if mic_num is None:
-            print("Device not found. Available devices are:")
-            for i, device in enumerate(devices):
-                print(f"{i}: {device['name']}")
-            exit(1)
-        return mic_num
+    def get_mic_list(self):
+        return sd.query_devices()
+        
+    def set_mic(self, mic_num):
+        self.mic_num = mic_num
 
     def start(self):
+        if self.mic_num is None:
+            print("Select a microphone first.")
+            return
         self.stop_recording = threading.Event()
         self.thread = threading.Thread(target=self.record_audio)
         self.thread.start()
@@ -39,13 +38,11 @@ class AudioRecorder:
         self.recording = np.empty((0, self.channels), dtype='int16')
         self.start_time = datetime.now()
         try:
-            with sd.InputStream(device=self.mic_num, channels=self.channels, samplerate=self.fs, dtype='int16') as stream:
+            with sd.InputStream(device=self.mic_num, channels=self.channels, samplerate=self.samplerate, dtype='int16') as stream:
                 print("Recording... Press Ctrl+C to stop.")
                 while not self.stop_recording.is_set():
-                    audio_chunk, overflowed = stream.read(self.fs)
+                    audio_chunk, overflowed = stream.read(self.samplerate)
                     self.recording = np.vstack((self.recording, audio_chunk))
-        except KeyboardInterrupt:
-            print("Stopped by user.")
         except Exception as e:
             print(f"An error occurred: {e}")
         finally:
@@ -55,14 +52,11 @@ class AudioRecorder:
         if recording.size == 0:
             print("No audio data recorded.")
             return
-        end_time = datetime.now()
-        duration = end_time - start_time
-        duration_str = f"{duration.seconds//3600}h{duration.seconds//60%60}m{duration.seconds%60}s"
-        current_time = end_time.strftime("%Y-%m-%d--%H-%M-%S")
-        filename = f"{duration_str}--{current_time}.wav"
+        end_time = datetime.now().strftime("%m-%d--%H-%M-%S")
+        filename = f"{end_time}.wav"
         if not os.path.exists('recordings'):
             os.makedirs('recordings')
         final_path = os.path.join('recordings', filename)
-        wavio.write(final_path, recording, self.fs, sampwidth=2)
+        wavio.write(final_path, recording, self.samplerate, sampwidth=2)
         print(f"Done. Saved as {filename}")
         return filename

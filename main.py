@@ -33,9 +33,12 @@ class TimerHandler:
 
     def update_timer(self, *args):
         self.seconds += 1
-        # BUG: not showing hours
         mins, sec = divmod(self.seconds, 60)
-        self.label.text = f"{mins:02d}:{sec:02d}"
+        hours, mins = divmod(mins, 60)
+        if hours == 0:
+            self.label.text = f"{mins:02d}:{sec:02d}"
+        else:
+            self.label.text = f"{hours:02d}:{mins:02d}:{sec:02d}"
 
 class FileListHandler:
     def __init__(self, box):
@@ -61,7 +64,7 @@ class RecorderApp(App):
         self.box.add_widget(self.custom_button)
         self.box.add_widget(self.file_box)
         
-        self.audio_recorder = AudioRecorder(fs=384000, channels=1)
+        self.audio_recorder = AudioRecorder(samplerate=384000, channels=1)
         
         self.timer_handler = TimerHandler(self.timer_label)
         self.file_list_handler = FileListHandler(self.file_box)
@@ -72,6 +75,12 @@ class RecorderApp(App):
 
 
         self.custom_button.redraw(self.recording)
+
+        print(self.audio_recorder.get_mic_list())
+
+        # get user input
+        user_input = input("Enter mic number: ")
+        self.audio_recorder.set_mic(int(user_input))
 
         return self.box
 
