@@ -1,4 +1,4 @@
-# MagicMic 🎙️
+# PiMic 🎙️
 
 ## Overview
 
@@ -21,12 +21,12 @@ This project is currently under active development and is not yet ready for gene
 1. Clone the repository
 
 ```bash
-git clone https://github.com/spuschmann-tgm/MagicMic.git
+git clone https://github.com/PlantWhispers/PiMic.git
 ```
 2. Navigate to the project directory
 
 ```bash
-cd MagicMic
+cd PiMic
 ```
 
 3. Create a virtual environment
@@ -62,3 +62,4 @@ Feel free to open issues or PRs if you have suggestions or bug-fixes.
 ## License
 
 MIT License
+Magic
