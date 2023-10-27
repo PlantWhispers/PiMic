@@ -21,10 +21,12 @@ class AudioRecorder:
     def set_mic(self, mic_num):
         self.mic_num = mic_num
 
+    class NoMicrophoneException(Exception):
+        pass
+
     def start(self):
         if self.mic_num is None:
-            print("Select a microphone first.")
-            return
+            raise NoMicrophoneException("No microphone selected.")
         self.stop_recording = threading.Event()
         self.thread = threading.Thread(target=self.record_audio)
         self.thread.start()
