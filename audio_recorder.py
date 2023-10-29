@@ -10,8 +10,8 @@ import queue
 
 SAMPLERATE = 384_000
 CHANNELS = 1
-CACH_FOLDER = ".cache"
-TEMP_FILE_PATH = os.path.join(CACH_FOLDER,"temp.raw")
+CACHE_FOLDER = ".cache"
+TEMP_FILE_PATH = os.path.join(CACHE_FOLDER,"temp.raw")
 LATENCY = 0.01
 BLOCKSIZE = int(SAMPLERATE * LATENCY)
 
@@ -36,8 +36,8 @@ class AudioRecorder:
 
     def start(self):
         # Create temp file to offload memory
-        if not os.path.exists(CACH_FOLDER):
-            os.makedirs(CACH_FOLDER)
+        if not os.path.exists(CACHE_FOLDER):
+            os.makedirs(CACHE_FOLDER)
         header = self.create_wav_header()
         with open(TEMP_FILE_PATH, "wb") as f:
             f.write(header)
