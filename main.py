@@ -116,7 +116,6 @@ class SplashScreen(Screen):
 
 class MainScreen(Screen):
     def on_enter(self):
-        self.audio_recorder = AudioRecorder(samplerate=384000, channels=1)
         self.isRecording = False
         self.box = BoxLayout(orientation='vertical')
         self.file_box = BoxLayout(orientation='vertical')
@@ -172,7 +171,7 @@ class RecorderApp(App):
     isRecording = BooleanProperty(False)
     
     def build(self):
-        self.audio_recorder = AudioRecorder(samplerate=384000, channels=1)
+        self.audio_recorder = AudioRecorder()
         
         sm = ScreenManager()
         sm.add_widget(SplashScreen(name='splash'))
