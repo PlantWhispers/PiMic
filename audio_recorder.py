@@ -11,25 +11,27 @@ SAMPLERATE = 384_000
 CHANNELS = 1
 TEMP_FILE_PATH = ".cache/temp.raw"
 
+class NoMicrophoneException(Exception):
+    pass
+
 class AudioRecorder:
     def __init__(self):
         self.thread = None
-        self.mic_num = None
+        self.mic_num = self.select_mic()
         self.start_time = None
 
-    def get_mic_list(self):
-        return sd.query_devices()
-        
-    def set_mic(self, mic_num):
-        self.mic_num = mic_num
 
-    class NoMicrophoneException(Exception):
-        pass
+    def select_mic(self):
+        mic_list = sd.query_devices()
+        filtered_mic_list = [mic for mic in mic_list if mic['default_samplerate'] == SAMPLERATE]
+        if len(filtered_mic_list) == 0:
+            raise NoMicrophoneException("No microphone found.")
+        # Selects the first microphone with the correct samplerate. Might be a problem in the future
+        return filtered_mic_list[0]['index']
+            
+
 
     def start(self):
-        if self.mic_num is None:
-            raise NoMicrophoneException("No microphone selected.")
-
         # Create temp file to offload memory
         if not os.path.exists('.cache'):
             os.makedirs('.cache')
@@ -47,21 +49,19 @@ class AudioRecorder:
 
     def record_audio(self):
         self.start_time = datetime.now()
-        self.num_samples = 0
         try:
             with sd.InputStream(device=self.mic_num, channels=CHANNELS, samplerate=SAMPLERATE, dtype='int16') as stream, open(TEMP_FILE_PATH, "ab") as f:
                 while not self.stop_recording.is_set():
                     audio_chunk, overflowed = stream.read(SAMPLERATE)
-                    self.num_samples += len(audio_chunk)
                     f.write(audio_chunk.tobytes())
                     if overflowed:
                         print("Overflowed")
         except Exception as e:
             print(f"An error occurred: {e}")
         finally:
-            self.save_recording(self.start_time, self.num_samples)
+            self.save_recording(self.start_time)
 
-    def save_recording(self, start_time, num_samples):
+    def save_recording(self, start_time):
 
         self.update_wav_sizes()
 
@@ -85,8 +85,6 @@ class AudioRecorder:
             chunk_size = total_file_size - 8
             subchunk2_size = total_file_size - 44
 
-            print(f"chunk_size:{chunk_size}\nsubchunk2_size:{subchunk2_size}")
-
             # Update ChunkSize (at byte position 4-7)
             f.seek(4)
             f.write(struct.pack('<I', chunk_size))
@@ -99,11 +97,7 @@ class AudioRecorder:
     @staticmethod
     def create_wav_header(num_channels=CHANNELS, sample_width=2, sample_rate=SAMPLERATE):
         byte_rate = sample_rate * num_channels * sample_width
-        print(f"byte_rate:{byte_rate}")
         block_align = num_channels * sample_width
-        print(f"block_align:{block_align}")
-        # subchunk2_size = num_samples * num_channels * sample_width
-        # print(f"subchunk2_size:{subchunk2_size}")
 
         wav_header = struct.pack(
             "<4sI4s4sIHHIIHH4sI",
@@ -122,6 +116,4 @@ class AudioRecorder:
             00,
         )
         
-        print(wav_header)
-
         return wav_header

@@ -56,6 +56,7 @@ class TimerHandler:
             # If there are hours, display the hours, minutes, and seconds
             self.label.text = f"{hours:02d}:{mins:02d}:{sec:02d}"
 
+# TODO: Update to work with current audio_recorder
 class FileListHandler:
     def __init__(self, box):
         self.box = box
@@ -63,55 +64,6 @@ class FileListHandler:
     def add_file(self, filename):
         file_label = Label(text=filename, size_hint_y=None, height=30)
         self.box.add_widget(file_label)
-
-
-BUTTON_HEIGHT = 50
-
-class SplashScreen(Screen):
-    def on_enter(self):
-        self.setup_mic_list()
-
-    def setup_mic_list(self):
-        label_text, mic_list = self.get_filtered_mic_list()
-        if len(mic_list) == 1:
-            self.select_mic(mic_index=mic_list[0]['index'])
-            return
-        self.populate_mic_buttons(label_text, mic_list)
-
-    def get_filtered_mic_list(self):
-        mic_list = App.get_running_app().audio_recorder.get_mic_list()
-        filtered_mic_list = [mic for mic in mic_list if mic['default_samplerate'] >= SAMPLERATE_FILTER]
-        if len(filtered_mic_list) == 0:
-            return (f"No microphone with samplerate above {SAMPLERATE_FILTER}.\nPlease choose one of these microphones:", mic_list)
-        return (f"Here are all microphones with samplerate above {SAMPLERATE_FILTER}.\nPlease choose one of these microphones:", filtered_mic_list)
-
-    def populate_mic_buttons(self, label_text, mic_list):
-        box = BoxLayout(orientation='vertical', size_hint_y=None)
-        box.bind(minimum_height=box.setter('height'))
-
-        label = Label(text=label_text, size_hint_y=None, height=BUTTON_HEIGHT*2)
-        box.add_widget(label)
-
-        mic_options = [(mic['name'], mic['index']) for mic in mic_list]
-        for name, index in mic_options:
-            btn = Button(text=str(name), size_hint_y=None, height=BUTTON_HEIGHT)
-            btn.bind(on_press=lambda instance, index=index: self.select_mic(mic_index=index))
-            box.add_widget(btn)
-
-        scroll = ScrollView(size_hint=(1, 1))
-        scroll.add_widget(box)
-        self.add_widget(scroll)
-
-    def select_mic(self, mic_index):
-        App.get_running_app().audio_recorder.set_mic(mic_index)
-        print(mic_index)
-        self.try_switch_to_main()
-
-    def try_switch_to_main(self, *args):
-        try:
-            self.manager.current = 'main'
-        except Exception as e:
-            Clock.schedule_once(self.try_switch_to_main, 0.1)
 
 
 class MainScreen(Screen):
@@ -174,9 +126,8 @@ class RecorderApp(App):
         self.audio_recorder = AudioRecorder()
         
         sm = ScreenManager()
-        sm.add_widget(SplashScreen(name='splash'))
         sm.add_widget(MainScreen(name='main'))
-        sm.current = 'splash'
+        sm.current = 'main'
         
         return sm
 
