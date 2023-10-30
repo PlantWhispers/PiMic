@@ -1,3 +1,35 @@
+"""
+Implementation Context:
+
+- SamplingRate: 384kHz
+  - Reason: To capture high-frequency sounds from plants.
+  - Impact: Increases CPU and storage requirements.
+
+- Language: Python
+  - Reason: Portability and ease of use.
+  - Impact: Slower execution speed, optimized via threading.
+
+- MemoryStrategy: TempFile
+  - Reason: To manage large data sizes.
+  - Impact: Requires file operations to convert to final format.
+
+- FileFormat: WAV
+  - Reason: Lossless audio storage.
+  - Impact: Larger file size, header manipulation needed.
+
+- FileOperation: SameDevice
+  - Reason: Faster file moving operations.
+  - Impact: Limits storage options to a single device.
+
+- Threading: Multi
+  - Reason: To separate tasks and minimize data loss.
+  - Impact: Complexity in data synchronization.
+
+- Latency: 10ms
+  - Reason: To increase hardware buffer size.
+  - Impact: Adds slight delay but improves data integrity.
+"""
+
 import sounddevice as sd
 import numpy as np
 import wavio
